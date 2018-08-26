@@ -2585,12 +2585,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MovingTurnSpeed: 360
   m_StationaryTurnSpeed: 180
-  m_JumpPower: 10
-  m_GravityMultiplier: 2
   m_RunCycleLegOffset: 0.2
   m_MoveSpeedMultiplier: 1
   m_AnimSpeedMultiplier: 1
   m_GroundCheckDistance: 0.3
+  m_JumpPower: 10
+  jumpQuant: 2
+  m_GravityMultiplier: 2
+  canFly: 0
+  dashStep: 0.1
+  dashDistance: 4
+  dashCooldown: 5
 --- !u!124 &124209040083078090
 Behaviour:
   m_ObjectHideFlags: 1

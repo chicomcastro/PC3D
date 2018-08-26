@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 namespace PC3D
 {
@@ -7,16 +8,32 @@ namespace PC3D
     [RequireComponent(typeof(Animator))]
     public class PC3DCharacter : MonoBehaviour
     {
+        [Header("Standard Info")]
         [SerializeField] float m_MovingTurnSpeed = 360;
         [SerializeField] float m_StationaryTurnSpeed = 180;
-        [SerializeField] float m_JumpPower = 12f;
-        [Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
         [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
         [SerializeField] float m_MoveSpeedMultiplier = 1f;
         [SerializeField] float m_AnimSpeedMultiplier = 1f;
         [SerializeField] float m_GroundCheckDistance = 0.1f;
+
+        [Space(5)]
+        [Header("Jump information")]
+        [SerializeField] float m_JumpPower = 12f;
         [SerializeField] int jumpQuant = 2;
+        [Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
         [SerializeField] bool canFly = false;
+
+        [Space(5)]
+        [Header("Dash information")]
+        [SerializeField] float dashStep = 0.1f;
+        [SerializeField] float dashDistance = 10;
+        [SerializeField] float dashCooldown = 0.76f;
+
+        int jumpPotential = 2;
+
+        bool isDashing = false;
+        public const float maxDashTime = 1.0f;
+        float currentDashTime = maxDashTime;
 
         Rigidbody m_Rigidbody;
         Animator m_Animator;
@@ -30,8 +47,6 @@ namespace PC3D
         Vector3 m_CapsuleCenter;
         CapsuleCollider m_Capsule;
         bool m_Crouching;
-        int jumpPotential = 2;
-
 
         void Start()
         {
@@ -46,8 +61,37 @@ namespace PC3D
         }
 
 
-        public void Move(Vector3 move, bool crouch, bool jump)
+        public void Move(Vector3 move, bool crouch, bool jump, bool dash)
         {
+            #region dash
+            // See if we're supposed to dash
+            if (dash && !isDashing)
+            {
+                currentDashTime = 0;
+                isDashing = true;
+            }
+
+            // If yes, implement our translation
+            if (currentDashTime < maxDashTime)
+            {
+                Vector3 moveDirection = Vector3.zero;
+                moveDirection = transform.forward * dashDistance;
+
+                transform.position += (moveDirection * Time.deltaTime * dashDistance);
+                currentDashTime += dashStep;
+                return;
+            }
+            // Wait a little bit to reach cooldown
+            else if (currentDashTime - maxDashTime < dashCooldown)
+            {
+                currentDashTime += dashStep;
+            }
+            // Set we've finished dashing and can dashing again
+            else
+            {
+                isDashing = false;
+            }
+            #endregion
 
             // convert the world relative moveInput vector into a local-relative
             // turn amount and forward amount required to head in the desired
