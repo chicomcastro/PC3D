@@ -6,11 +6,10 @@ namespace PC3D
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(Animator))]
-    public class PC3DCharacter : MonoBehaviour
+    public class Danilo_PC3DCharacter : MonoBehaviour
     {
         [Header("Standard Info")]
-        [SerializeField]
-        float m_MovingTurnSpeed = 360;
+        [SerializeField] float m_MovingTurnSpeed = 360;
         [SerializeField] float m_StationaryTurnSpeed = 180;
         [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
         [SerializeField] float m_MoveSpeedMultiplier = 1f;
@@ -19,24 +18,31 @@ namespace PC3D
 
         [Space(5)]
         [Header("Jump information")]
-        [SerializeField]
-        float m_JumpPower = 12f;
+        [SerializeField] float m_JumpPower = 12f;
         [SerializeField] int jumpQuant = 2;
         [Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
         [SerializeField] bool canFly = false;
 
         [Space(5)]
         [Header("Dash information")]
-        [SerializeField]
-        float dashStep = 0.1f;
+        [SerializeField] float dashStep = 0.1f;
         [SerializeField] float dashDistance = 10;
         [SerializeField] float dashCooldown = 0.76f;
+
+        [Space(5)]
+        [Header("Slide information")]
+        [SerializeField] float sildeStep = 0.1f;
+        [SerializeField] bool slideJump;
+        [SerializeField] bool slideDown;
 
         int jumpPotential = 2;
 
         bool isDashing = false;
+        bool isSliding = false;
         public const float maxDashTime = 1.0f;
+        public const float maxSlideTime = 8.0f;
         float currentDashTime = maxDashTime;
+        float currentSlideTime = 0;
 
         Rigidbody m_Rigidbody;
         Animator m_Animator;
@@ -64,8 +70,9 @@ namespace PC3D
         }
 
 
-        public void Move(Vector3 move, bool crouch, bool jump, bool dash)
+        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide)
         {
+            Debug.Log(currentSlideTime + " " + preslide);
             #region dash
             // See if we're supposed to dash
             if (dash && !isDashing)
@@ -94,6 +101,41 @@ namespace PC3D
             {
                 isDashing = false;
             }
+            #endregion
+
+            #region slide
+
+            if (currentSlideTime >= maxSlideTime)
+            {
+                //isSliding = false;
+                Danilo_PC3DUserControl.preslide = false;
+                preslide = false;
+                currentSlideTime = 0;
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+
+            if (preslide && slide /*&& !isSliding*/)
+            {
+                //currentSlideTime = 0;
+                //isSliding = true;
+                //m_Rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+                currentSlideTime += sildeStep;
+                //Vector3 extraGravityForce = -2*Physics.gravity;
+                //m_Rigidbody.AddForce(extraGravityForce);
+                m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
+            }
+            else
+            {
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+                currentSlideTime = 0;
+            }
+
+            /*if (isSliding)
+            {
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+                currentSlideTime += sildeStep;
+            }
+            else m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;*/
             #endregion
 
             // convert the world relative moveInput vector into a local-relative
@@ -163,7 +205,6 @@ namespace PC3D
                 }
             }
         }
-
 
         void UpdateAnimator(Vector3 move)
         {
