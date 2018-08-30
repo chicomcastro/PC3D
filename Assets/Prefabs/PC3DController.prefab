@@ -2596,6 +2596,9 @@ MonoBehaviour:
   dashStep: 0.1
   dashDistance: 4
   dashCooldown: 5
+  sildeStep: 0.1
+  slideJump: 0
+  slideDown: 0
 --- !u!124 &124209040083078090
 Behaviour:
   m_ObjectHideFlags: 1
