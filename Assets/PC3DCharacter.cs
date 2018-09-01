@@ -9,8 +9,7 @@ namespace PC3D
     public class PC3DCharacter : MonoBehaviour
     {
         [Header("Standard Info")]
-        [SerializeField]
-        float m_MovingTurnSpeed = 360;
+        [SerializeField] float m_MovingTurnSpeed = 360;
         [SerializeField] float m_StationaryTurnSpeed = 180;
         [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
         [SerializeField] float m_MoveSpeedMultiplier = 1f;
@@ -19,28 +18,35 @@ namespace PC3D
 
         [Space(5)]
         [Header("Jump information")]
-        [SerializeField]
-        float m_JumpPower = 12f;
+        [SerializeField] float m_JumpPower = 12f;
         [SerializeField] int jumpQuant = 2;
         [Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
         [SerializeField] bool canFly = false;
 
         [Space(5)]
         [Header("Dash information")]
-        [SerializeField]
-        float dashStep = 0.1f;
+        [SerializeField] float dashStep = 0.1f;
         [SerializeField] float dashDistance = 10;
         [SerializeField] float dashCooldown = 0.76f;
+
+        [Space(5)]
+        [Header("Slide information")]
+        [SerializeField] float sildeStep = 0.1f;
+        [SerializeField] bool slideJump;
+        [SerializeField] bool slideDown;
 
         int jumpPotential = 2;
 
         bool isDashing = false;
+        bool isSliding = false;
         public const float maxDashTime = 1.0f;
+        public const float maxSlideTime = 8.0f;
         float currentDashTime = maxDashTime;
+        float currentSlideTime = 0;
 
         Rigidbody m_Rigidbody;
         Animator m_Animator;
-        bool m_IsGrounded;
+        public static bool m_IsGrounded;
         float m_OrigGroundCheckDistance;
         const float k_Half = 0.5f;
         float m_TurnAmount;
@@ -50,6 +56,8 @@ namespace PC3D
         Vector3 m_CapsuleCenter;
         CapsuleCollider m_Capsule;
         bool m_Crouching;
+        bool spinning = false;
+        public int pulo_plano, pulo_y;
 
         void Start()
         {
@@ -63,9 +71,25 @@ namespace PC3D
             m_OrigGroundCheckDistance = m_GroundCheckDistance;
         }
 
-
-        public void Move(Vector3 move, bool crouch, bool jump, bool dash)
+        void gira()
         {
+            //transform.rotation = Quaternion.LookRotation(-transform.forward, new Vector3(0, 0, 0));
+            //transform.LookAt(transform.position - 2 * -transform.forward);
+            if (spinning)
+            {
+                Vector3 targetAngles = transform.eulerAngles + 180f * Vector3.up; // what the new angles should be
+                transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, targetAngles, 2*Time.deltaTime);       
+            }
+        }
+
+        void cancela()
+        {
+            spinning = false;
+        }
+
+        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide)
+        {
+            gira();
             #region dash
             // See if we're supposed to dash
             if (dash && !isDashing)
@@ -93,6 +117,37 @@ namespace PC3D
             else
             {
                 isDashing = false;
+            }
+            #endregion
+
+            #region slide
+            if (currentSlideTime >= maxSlideTime)
+            {
+                //isSliding = false;
+                PC3DUserControl.preslide = false;
+                preslide = false;
+                currentSlideTime = 0;
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+
+            if (preslide && slide && !m_IsGrounded)
+            {
+                currentSlideTime += sildeStep;
+                m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
+                Vector3 dir = -pulo_plano * transform.forward + new Vector3(0, pulo_y, 0);
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    m_Rigidbody.velocity = new Vector3(0,0,0);
+                    m_Rigidbody.AddForce(dir);
+                    m_IsGrounded = true;
+                    spinning = true;
+                    Invoke("cancela", 0.5f);
+                }
+            }
+            else
+            {
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+                currentSlideTime = 0;
             }
             #endregion
 
@@ -163,7 +218,6 @@ namespace PC3D
                 }
             }
         }
-
 
         void UpdateAnimator(Vector3 move)
         {

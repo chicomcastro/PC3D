@@ -12,7 +12,8 @@ namespace PC3D
         private Vector3 m_CamForward;             // The current forward direction of the camera
         private Vector3 m_Move;
         private bool m_Jump;                      // the world-relative desired move direction, calculated from the camForward and user input.
-
+        private bool m_sliding;
+        public static bool preslide;
 
         private void Start()
         {
@@ -35,9 +36,27 @@ namespace PC3D
 
         private void Update()
         {
+            if (CrossPlatformInputManager.GetButtonDown("Front")) preslide = true;
+            if (CrossPlatformInputManager.GetButtonUp("Front")) preslide = false;
             if (!m_Jump)
             {
                 m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
+            }
+        }
+
+        /*private void OnTriggerEnter(Collider col)
+        {
+            if (preslide && CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
+            if (col.gameObject.tag == "wall") preslide = true;
+        }*/
+
+        private void OnCollisionStay(Collision col)
+        {
+            //if (preslide && CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
+            if (col.gameObject.tag == "wall")
+            {
+                if (CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
+                else m_sliding = false;
             }
         }
 
@@ -65,12 +84,15 @@ namespace PC3D
             }
 #if !MOBILE_INPUT
             // walk speed multiplier
-            if (Input.GetKey(KeyCode.LeftShift)) m_Move *= 0.5f;
+            if (Input.GetKey(KeyCode.LeftShift)) m_Move *= 2;
 #endif
 
+            if (!PC3DCharacter.m_IsGrounded) m_Move = new Vector3(0, 0, 0);
+
             // pass all parameters to the character control script
-            m_Character.Move(m_Move, crouch, m_Jump, dash);
+            m_Character.Move(m_Move, crouch, m_Jump, dash, m_sliding, preslide);
             m_Jump = false;
+            m_sliding = false;
         }
     }
 }
