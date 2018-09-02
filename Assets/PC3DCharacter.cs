@@ -56,8 +56,8 @@ namespace PC3D
         Vector3 m_CapsuleCenter;
         CapsuleCollider m_Capsule;
         bool m_Crouching;
-        bool spinning = false;
-        public int pulo_plano, pulo_y;
+        bool spinning = false;      //bool activated with the wall jump
+        public int jump_plane, jump_y;      //variables to control the wall jump force
 
         void Start()
         {
@@ -71,10 +71,8 @@ namespace PC3D
             m_OrigGroundCheckDistance = m_GroundCheckDistance;
         }
 
-        void gira()
+        void spin()         //spin when wall jump
         {
-            //transform.rotation = Quaternion.LookRotation(-transform.forward, new Vector3(0, 0, 0));
-            //transform.LookAt(transform.position - 2 * -transform.forward);
             if (spinning)
             {
                 Vector3 targetAngles = transform.eulerAngles + 180f * Vector3.up; // what the new angles should be
@@ -82,14 +80,22 @@ namespace PC3D
             }
         }
 
-        void cancela()
+        void align(Vector3 par)         //align with wall when grab
+        {
+            //transform.eulerAngles = Vector3.Lerp(transform.forward, -par, 0.2f * Time.deltaTime);
+            Quaternion rot = Quaternion.FromToRotation(transform.forward, par);
+            transform.rotation *= rot;
+        }
+
+        void cancel()
         {
             spinning = false;
         }
 
-        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide)
+        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide, Vector3 normal, bool airMov)
         {
-            gira();
+            //if (airMov) move = Vector3.Dot(move,transform.forward)*transform.forward;
+            spin();
             #region dash
             // See if we're supposed to dash
             if (dash && !isDashing)
@@ -123,7 +129,6 @@ namespace PC3D
             #region slide
             if (currentSlideTime >= maxSlideTime)
             {
-                //isSliding = false;
                 PC3DUserControl.preslide = false;
                 preslide = false;
                 currentSlideTime = 0;
@@ -132,16 +137,17 @@ namespace PC3D
 
             if (preslide && slide && !m_IsGrounded)
             {
+                align(normal);
                 currentSlideTime += sildeStep;
                 m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
-                Vector3 dir = -pulo_plano * transform.forward + new Vector3(0, pulo_y, 0);
+                Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
                 if (Input.GetKey(KeyCode.Space))
                 {
-                    m_Rigidbody.velocity = new Vector3(0,0,0);
+                    jump = false;
                     m_Rigidbody.AddForce(dir);
-                    m_IsGrounded = true;
+                    m_IsGrounded = false;
                     spinning = true;
-                    Invoke("cancela", 0.5f);
+                    Invoke("cancel", 0.5f);
                 }
             }
             else

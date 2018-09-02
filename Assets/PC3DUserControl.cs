@@ -12,8 +12,10 @@ namespace PC3D
         private Vector3 m_CamForward;             // The current forward direction of the camera
         private Vector3 m_Move;
         private bool m_Jump;                      // the world-relative desired move direction, calculated from the camForward and user input.
-        private bool m_sliding;
-        public static bool preslide;
+        private bool m_sliding;                 //true when the player is sliding
+        public static bool preslide;        //true before the player grabs the wall
+        public static Vector3 alignDir;         //return the vector perpendicular to the collider
+        public static bool airMov = false;
 
         private void Start()
         {
@@ -44,20 +46,14 @@ namespace PC3D
             }
         }
 
-        /*private void OnTriggerEnter(Collider col)
-        {
-            if (preslide && CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
-            if (col.gameObject.tag == "wall") preslide = true;
-        }*/
-
         private void OnCollisionStay(Collision col)
         {
-            //if (preslide && CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
             if (col.gameObject.tag == "wall")
             {
                 if (CrossPlatformInputManager.GetButton("Front")) m_sliding = true;
                 else m_sliding = false;
             }
+            alignDir = -col.contacts[0].normal;
         }
 
 
@@ -69,6 +65,7 @@ namespace PC3D
             float v = CrossPlatformInputManager.GetAxis("Vertical");
             bool crouch = Input.GetKey(KeyCode.C);
             bool dash = Input.GetButtonDown("Fire2");
+            airMov = false;
 
             // calculate move direction to pass to character
             if (m_Cam != null)
@@ -88,9 +85,10 @@ namespace PC3D
 #endif
 
             if (!PC3DCharacter.m_IsGrounded) m_Move = new Vector3(0, 0, 0);
+            //if (!PC3DCharacter.m_IsGrounded) airMov = true;
 
             // pass all parameters to the character control script
-            m_Character.Move(m_Move, crouch, m_Jump, dash, m_sliding, preslide);
+            m_Character.Move(m_Move, crouch, m_Jump, dash, m_sliding, preslide, alignDir, airMov);
             m_Jump = false;
             m_sliding = false;
         }
