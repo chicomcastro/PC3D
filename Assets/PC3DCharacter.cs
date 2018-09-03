@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using UnityStandardAssets.CrossPlatformInput;
 
 namespace PC3D
 {
@@ -92,9 +93,8 @@ namespace PC3D
             spinning = false;
         }
 
-        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide, Vector3 normal, bool airMov)
+        public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide, Vector3 normal)
         {
-            //if (airMov) move = Vector3.Dot(move,transform.forward)*transform.forward;
             spin();
             #region dash
             // See if we're supposed to dash
@@ -157,6 +157,8 @@ namespace PC3D
             }
             #endregion
 
+            if(spinning) move = new Vector3(0, 0, 0);
+
             // convert the world relative moveInput vector into a local-relative
             // turn amount and forward amount required to head in the desired
             // direction.
@@ -176,6 +178,7 @@ namespace PC3D
             }
             else
             {
+                if (!isSliding && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*transform.forward;
                 HandleAirborneMovement(jump);
             }
 

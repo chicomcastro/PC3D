@@ -548,6 +548,11 @@ Prefab:
       propertyPath: jump_y
       value: 600
       objectReference: {fileID: 0}
+    - target: {fileID: 114744731318554780, guid: 9232971859bcdab468042a7653743876,
+        type: 2}
+      propertyPath: canFly
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9232971859bcdab468042a7653743876, type: 2}
   m_IsPrefabAsset: 0

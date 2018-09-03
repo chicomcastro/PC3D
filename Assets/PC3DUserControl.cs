@@ -84,11 +84,11 @@ namespace PC3D
             if (Input.GetKey(KeyCode.LeftShift)) m_Move *= 2;
 #endif
 
-            if (!PC3DCharacter.m_IsGrounded) m_Move = new Vector3(0, 0, 0);
+            //if (!PC3DCharacter.m_IsGrounded) m_Move = new Vector3(0, 0, 0);
             //if (!PC3DCharacter.m_IsGrounded) airMov = true;
 
             // pass all parameters to the character control script
-            m_Character.Move(m_Move, crouch, m_Jump, dash, m_sliding, preslide, alignDir, airMov);
+            m_Character.Move(m_Move, crouch, m_Jump, dash, m_sliding, preslide, alignDir);
             m_Jump = false;
             m_sliding = false;
         }
