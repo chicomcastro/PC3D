@@ -83,9 +83,10 @@ namespace PC3D
 
         void align(Vector3 par)         //align with wall when grab
         {
-            //transform.eulerAngles = Vector3.Lerp(transform.forward, -par, 0.2f * Time.deltaTime);
+            //transform.eulerAngles = Vector3.Lerp(transform.forward, par, 0.2f * Time.deltaTime);
             Quaternion rot = Quaternion.FromToRotation(transform.forward, par);
             transform.rotation *= rot;
+            //transform.eulerAngles = par;
         }
 
         void cancel()
@@ -140,7 +141,8 @@ namespace PC3D
                 align(normal);
                 currentSlideTime += sildeStep;
                 m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
-                Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
+                //Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
+                Vector3 dir = -jump_plane * normal + new Vector3(0, jump_y, 0);
                 if (Input.GetKey(KeyCode.Space))
                 {
                     jump = false;
@@ -178,7 +180,7 @@ namespace PC3D
             }
             else
             {
-                if (!isSliding && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*transform.forward;
+                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*transform.forward;
                 HandleAirborneMovement(jump);
             }
 

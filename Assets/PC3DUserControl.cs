@@ -15,7 +15,6 @@ namespace PC3D
         private bool m_sliding;                 //true when the player is sliding
         public static bool preslide;        //true before the player grabs the wall
         public static Vector3 alignDir;         //return the vector perpendicular to the collider
-        public static bool airMov = false;
 
         private void Start()
         {
@@ -54,6 +53,7 @@ namespace PC3D
                 else m_sliding = false;
             }
             alignDir = -col.contacts[0].normal;
+            //alignDir = Vector3.Dot(transform.forward, col.contacts[0].normal)* col.contacts[0].normal;
         }
 
 
@@ -65,7 +65,6 @@ namespace PC3D
             float v = CrossPlatformInputManager.GetAxis("Vertical");
             bool crouch = Input.GetKey(KeyCode.C);
             bool dash = Input.GetButtonDown("Fire2");
-            airMov = false;
 
             // calculate move direction to pass to character
             if (m_Cam != null)
