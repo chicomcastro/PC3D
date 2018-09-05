@@ -96,6 +96,7 @@ namespace PC3D
 
         public void Move(Vector3 move, bool crouch, bool jump, bool dash, bool slide, bool preslide, Vector3 normal)
         {
+            transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
             spin();
             #region dash
             // See if we're supposed to dash
@@ -138,6 +139,8 @@ namespace PC3D
 
             if (preslide && slide && !m_IsGrounded)
             {
+                jumpPotential = 0;
+                m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
                 align(normal);
                 currentSlideTime += sildeStep;
                 m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
@@ -180,7 +183,7 @@ namespace PC3D
             }
             else
             {
-                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*transform.forward;
+                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*new Vector3(transform.forward.x,0,transform.forward.z);
                 HandleAirborneMovement(jump);
             }
 
