@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
@@ -6,7 +6,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 {
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
-    public class RigidbodyFirstPersonController : MonoBehaviour
+    public class FPSController : MonoBehaviour
     {
         [Serializable]
         public class MovementSettings
@@ -89,6 +89,26 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private Vector3 m_GroundContactNormal;
         private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded;
 
+        private bool dash;
+        private bool isDashing;
+        public float dashDistance;
+        public float dashStep;
+        public float dashCooldown;
+        private float currentDashTime;
+        public float maxDashTime;
+
+        private float currentSlideTime;
+        public float maxSlideTime;
+        public float sildeStep;
+        private bool preslide;
+        private bool slide;
+
+        public float jump_plane;
+        public float jump_y;
+        private bool jump;
+
+        private bool spinning;
+        private Vector3 normal;
 
         public Vector3 Velocity
         {
@@ -136,9 +156,47 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
         }
 
+        private void OnCollisionStay(Collision col)
+        {
+            slide = false;
+            if (col.gameObject.tag == "wall")
+            {
+                if (CrossPlatformInputManager.GetButton("Front")) slide = true;
+                else slide = false;
+            }
+            normal = -col.contacts[0].normal;
+        }
+
+
+        void spin()         //spin when wall jump
+        {
+            if (spinning)
+            {
+                Vector3 targetAngles = transform.eulerAngles + 180f * Vector3.up; // what the new angles should be
+                cam.transform.localPosition = Vector3.Lerp(transform.eulerAngles, targetAngles, 2 * Time.deltaTime);
+            }
+        }
+
+        void align(Vector3 par)         //align with wall when grab
+        {
+            //transform.eulerAngles = Vector3.Lerp(transform.forward, par, 0.2f * Time.deltaTime);
+            Quaternion rot = Quaternion.FromToRotation(transform.forward, par);
+            cam.transform.rotation *= rot;
+        }
+
+        void cancel()
+        {
+            spinning = false;
+        }
+
 
         private void FixedUpdate()
         {
+
+            if (CrossPlatformInputManager.GetButtonDown("Front")) preslide = true;
+            if (CrossPlatformInputManager.GetButtonUp("Front")) preslide = false;
+            spin();
+
             GroundCheck();
             Vector2 input = GetInput();
 
@@ -184,6 +242,72 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
             }
             m_Jump = false;
+
+
+            #region dash
+            // See if we're supposed to dash
+            dash = Input.GetButtonDown("Fire2");
+            if (dash && !isDashing)
+            {
+                currentDashTime = 0;
+                isDashing = true;
+            }
+
+            // If yes, implement our translation
+            if (currentDashTime < maxDashTime)
+            {
+                Vector3 moveDirection = Vector3.zero;
+                moveDirection = transform.forward * dashDistance;
+
+                transform.position += (moveDirection * Time.deltaTime * dashDistance);
+                currentDashTime += dashStep;
+                return;
+            }
+            // Wait a little bit to reach cooldown
+            else if (currentDashTime - maxDashTime < dashCooldown)
+            {
+                currentDashTime += dashStep;
+            }
+            // Set we've finished dashing and can dashing again
+            else
+            {
+                isDashing = false;
+            }
+            #endregion
+
+            #region slide
+            if (currentSlideTime >= maxSlideTime)
+            {
+                preslide = false;
+                currentSlideTime = 0;
+                //Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+
+            if (preslide && slide)
+            {
+                //m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+                //align(-normal);
+                currentSlideTime += sildeStep;
+                m_RigidBody.velocity = new Vector3(0, 0, 0);
+                //Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
+                Vector3 dir = -jump_plane * normal + new Vector3(0, jump_y, 0);
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    Debug.Log("oi");
+                    m_RigidBody.velocity = dir;
+                    slide = false;
+                    spinning = true;
+                    Invoke("cancel", 0.5f);
+                }
+            }
+            else
+            {
+                //m_RigidBody.constraints = RigidbodyConstraints.FreezeRotation;
+                currentSlideTime = 0;
+            }
+            #endregion
+
+            Debug.Log("peslide: " + preslide + " Slide: " + slide);
         }
 
 

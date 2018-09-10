@@ -10,7 +10,8 @@ namespace PC3D
     public class PC3DCharacter : MonoBehaviour
     {
         [Header("Standard Info")]
-        [SerializeField] float m_MovingTurnSpeed = 360;
+        [SerializeField]
+        float m_MovingTurnSpeed = 360;
         [SerializeField] float m_StationaryTurnSpeed = 180;
         [SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
         [SerializeField] float m_MoveSpeedMultiplier = 1f;
@@ -19,20 +20,23 @@ namespace PC3D
 
         [Space(5)]
         [Header("Jump information")]
-        [SerializeField] float m_JumpPower = 12f;
+        [SerializeField]
+        float m_JumpPower = 12f;
         [SerializeField] int jumpQuant = 2;
         [Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
         [SerializeField] bool canFly = false;
 
         [Space(5)]
         [Header("Dash information")]
-        [SerializeField] float dashStep = 0.1f;
+        [SerializeField]
+        float dashStep = 0.1f;
         [SerializeField] float dashDistance = 10;
         [SerializeField] float dashCooldown = 0.76f;
 
         [Space(5)]
         [Header("Slide information")]
-        [SerializeField] float sildeStep = 0.1f;
+        [SerializeField]
+        float sildeStep = 0.1f;
         [SerializeField] bool slideJump;
         [SerializeField] bool slideDown;
 
@@ -77,7 +81,7 @@ namespace PC3D
             if (spinning)
             {
                 Vector3 targetAngles = transform.eulerAngles + 180f * Vector3.up; // what the new angles should be
-                transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, targetAngles, 2*Time.deltaTime);       
+                transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, targetAngles, 2 * Time.deltaTime);
             }
         }
 
@@ -143,7 +147,7 @@ namespace PC3D
                 m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
                 align(normal);
                 currentSlideTime += sildeStep;
-                m_Rigidbody.velocity = new Vector3(0, -currentSlideTime/3, 0);
+                m_Rigidbody.velocity = new Vector3(0, -currentSlideTime / 3, 0);
                 //Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
                 Vector3 dir = -jump_plane * normal + new Vector3(0, jump_y, 0);
                 if (Input.GetKey(KeyCode.Space))
@@ -162,7 +166,7 @@ namespace PC3D
             }
             #endregion
 
-            if(spinning) move = new Vector3(0, 0, 0);
+            if (spinning) move = new Vector3(0, 0, 0);
 
             // convert the world relative moveInput vector into a local-relative
             // turn amount and forward amount required to head in the desired
@@ -183,7 +187,7 @@ namespace PC3D
             }
             else
             {
-                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5*new Vector3(transform.forward.x,0,transform.forward.z);
+                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5 * new Vector3(transform.forward.x, 0, transform.forward.z);
                 HandleAirborneMovement(jump);
             }
 
