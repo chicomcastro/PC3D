@@ -150,7 +150,7 @@ namespace PC3D
                 m_Rigidbody.velocity = new Vector3(0, -currentSlideTime / 3, 0);
                 //Vector3 dir = -jump_plane * transform.forward + new Vector3(0, jump_y, 0);
                 Vector3 dir = -jump_plane * normal + new Vector3(0, jump_y, 0);
-                if (Input.GetKey(KeyCode.Space))
+                if (CrossPlatformInputManager.GetButton("Jump"))
                 {
                     jump = false;
                     m_Rigidbody.AddForce(dir);
@@ -187,7 +187,8 @@ namespace PC3D
             }
             else
             {
-                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front")) m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5 * new Vector3(transform.forward.x, 0, transform.forward.z);
+                if (!slide && !spinning && CrossPlatformInputManager.GetButton("Front"))
+                    m_Rigidbody.velocity = new Vector3(0, m_Rigidbody.velocity.y, 0) + 5 * new Vector3(transform.forward.x, 0, transform.forward.z);
                 HandleAirborneMovement(jump);
             }
 
@@ -273,8 +274,6 @@ namespace PC3D
                 m_Animator.speed = 1;
             }
         }
-
-
         void HandleAirborneMovement(bool jump)
         {
             // apply extra gravity from multiplier:
@@ -298,8 +297,6 @@ namespace PC3D
                 m_GroundCheckDistance = 0.1f;
             }
         }
-
-
         void HandleGroundedMovement(bool crouch, bool jump)
         {
             // check whether conditions are right to allow a jump:
