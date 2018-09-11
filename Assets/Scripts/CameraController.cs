@@ -25,11 +25,13 @@ namespace PC3D
         public bool isFirstPerson = false;
 
         public Transform thirdPerson;
+        public Transform firstPerson;
 
         private Camera thirdPersonCamera;
         private Camera firstPersonCamera;
 
         private Vector3 thirdCamOffset;
+        private Vector3 firstCamOffset;
 
         [HideInInspector]
         public Camera cam;
@@ -65,7 +67,7 @@ namespace PC3D
                 return;
             }
 
-            firstPersonCamera = player.GetComponentInChildren<Camera>();
+            firstPersonCamera = camObj.GetComponent<Camera>();
 
             if (firstPersonCamera == null)
             {
@@ -74,9 +76,7 @@ namespace PC3D
 
             // Define our offsets to work on top of
             thirdCamOffset = thirdPerson.position - transform.position;
-
-            mouseLookFirstPerson.Init(player.transform, firstPersonCamera.transform);
-            mouseLookThirdPerson.Init(transform);
+            firstCamOffset = firstPerson.position - transform.position;
 
             SetCameraMode();
         }
@@ -110,12 +110,18 @@ namespace PC3D
             if (isFirstPerson)
             {
                 cam = firstPersonCamera;
-                mouseLookFirstPerson.Init(player.transform, cam.transform);
+                mouseLookFirstPerson.Init(transform);
+
+                // Att thirdPerson position
+                firstPerson.position = transform.position + firstCamOffset;
+
+                // Use this to lerp from first person camera position to third person one
+                cam.transform.position = thirdPersonCamera.transform.position;
             }
             else
             {
                 cam = thirdPersonCamera;
-                mouseLookThirdPerson.Init(transform);
+                mouseLookThirdPerson.Init(firstPerson);
 
                 // Att thirdPerson position
                 thirdPerson.position = transform.position + thirdCamOffset;
@@ -129,12 +135,17 @@ namespace PC3D
 
         private void FirstPersonCameraHandling()
         {
-            mouseLookFirstPerson.LookRotation(player.transform, cam.transform);
+            mouseLookFirstPerson.LookRotation(firstPerson);
+
+            // Lerp camera position to desire position
+            cam.transform.position = firstPerson.position;
+
+            cam.transform.eulerAngles = new Vector3(firstPerson.eulerAngles.x, firstPerson.eulerAngles.y, 0f);
         }
 
         private void ThirdPersonCameraHandling()
         {
-            mouseLookThirdPerson.LookRotationThirPerson(transform);
+            mouseLookThirdPerson.LookRotation(transform);
 
             // Lerp camera position to desire position
             cam.transform.position = Vector3.Lerp(cam.transform.position, thirdPerson.position, camTransitionSpeed * Time.deltaTime);
@@ -217,14 +228,14 @@ namespace PC3D
             }
             else
             {
-                character.localRotation = m_CharacterTargetRot;
-                camera.localRotation = m_CameraTargetRot;
+                character.rotation = m_CharacterTargetRot;
+                camera.rotation = m_CameraTargetRot;
             }
 
             UpdateCursorLock();
         }
 
-        public void LookRotationThirPerson(Transform cameraTracker)
+        public void LookRotation(Transform cameraTracker)
         {
             float yRot = CrossPlatformInputManager.GetAxis("Mouse X") * XSensitivity;
             float xRot = CrossPlatformInputManager.GetAxis("Mouse Y") * YSensitivity;
