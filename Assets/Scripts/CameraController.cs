@@ -39,7 +39,7 @@ namespace PC3D
         // First person variables
 
         [Space(10)]
-        [SerializeField] private MouseLook mouseLook;
+        [SerializeField] private MouseLook mouseLookFirstPerson;
         [SerializeField] private MouseLook mouseLookThirdPerson;
 
         void Start()
@@ -75,7 +75,7 @@ namespace PC3D
             // Define our offsets to work on top of
             thirdCamOffset = thirdPerson.position - transform.position;
 
-            mouseLook.Init(player.transform, firstPersonCamera.transform);
+            mouseLookFirstPerson.Init(player.transform, firstPersonCamera.transform);
             mouseLookThirdPerson.Init(transform);
 
             SetCameraMode();
@@ -110,7 +110,7 @@ namespace PC3D
             if (isFirstPerson)
             {
                 cam = firstPersonCamera;
-                mouseLook.Init(player.transform, cam.transform);
+                mouseLookFirstPerson.Init(player.transform, cam.transform);
             }
             else
             {
@@ -129,7 +129,7 @@ namespace PC3D
 
         private void FirstPersonCameraHandling()
         {
-            mouseLook.LookRotation(player.transform, cam.transform);
+            mouseLookFirstPerson.LookRotation(player.transform, cam.transform);
         }
 
         private void ThirdPersonCameraHandling()
@@ -162,7 +162,7 @@ namespace PC3D
                 isCursorVisible = !isCursorVisible;
             }
 
-            mouseLook.UpdateCursorLock();
+            mouseLookFirstPerson.UpdateCursorLock();
             mouseLookThirdPerson.UpdateCursorLock();
         }
     }
