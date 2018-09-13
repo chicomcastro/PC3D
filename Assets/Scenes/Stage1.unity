@@ -1149,7 +1149,7 @@ Prefab:
       objectReference: {fileID: 1245840592}
     - target: {fileID: 1016320941128526, guid: 8308d619ffa9fd145a9302ecdaed99c2, type: 2}
       propertyPath: m_Name
-      value: Camera Tracker (1)
+      value: Camera Tracker
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8308d619ffa9fd145a9302ecdaed99c2, type: 2}

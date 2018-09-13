@@ -83,6 +83,7 @@ namespace PC3D
 
         void Update()
         {
+
             // Follow the the player
             transform.position = player.transform.position;
 
@@ -96,10 +97,24 @@ namespace PC3D
             if (isFirstPerson)
             {
                 FirstPersonCameraHandling();
+
+                if (PC3DCharacter.wj == true)
+                {
+                    //cam.transform.eulerAngles = -PC3DUserControl.alignDir;
+                    //firstPerson.transform.eulerAngles = -PC3DUserControl.alignDir;
+                    //cam.transform.rotation = Quaternion.LookRotation(-PC3DUserControl.alignDir);
+                    //firstPerson.transform.rotation = Quaternion.LookRotation(-PC3DUserControl.alignDir);
+                    mouseLookThirdPerson.Init(firstPerson);
+                    cam.transform.rotation = Quaternion.LookRotation(-PC3DUserControl.alignDir);
+                    firstPerson.transform.rotation = Quaternion.LookRotation(-PC3DUserControl.alignDir);
+                }
+
                 return;
             }
 
             ThirdPersonCameraHandling();
+            
+
         }
 
         private void SetCameraMode()
@@ -175,6 +190,7 @@ namespace PC3D
 
             mouseLookFirstPerson.UpdateCursorLock();
             mouseLookThirdPerson.UpdateCursorLock();
+
         }
     }
 

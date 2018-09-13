@@ -63,6 +63,7 @@ namespace PC3D
         bool m_Crouching;
         bool spinning = false;      //bool activated with the wall jump
         public int jump_plane, jump_y;      //variables to control the wall jump force
+        public static bool wj;
 
         void Start()
         {
@@ -102,6 +103,8 @@ namespace PC3D
         {
             transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
             spin();
+            wj = false;
+
             #region dash
             // See if we're supposed to dash
             if (dash && !isDashing)
@@ -157,6 +160,7 @@ namespace PC3D
                     m_IsGrounded = false;
                     spinning = true;
                     Invoke("cancel", 0.5f);
+                    wj = true;
                 }
             }
             else
